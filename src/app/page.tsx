@@ -1,34 +1,40 @@
 "use client"
 
 import {Button} from "@/components/ui/button";
-import {useRef} from "react";
+import {useEffect, useRef} from "react";
 import {cn} from "@/lib/utils";
 import ClientAudioContainer from "@/app/_component/ClientAudioContainer";
 import {useWebSocket} from "@/hooks/useWebSocket";
-import {WS_ENDPOINTS} from "@/types/websocketConstant";
+import {WS_ENDPOINT_ENUM, WS_ENDPOINTS} from "@/types/websocketConstant";
 
 export default function Page() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioWorkletNodeRef = useRef<AudioWorkletNode | null>(null);
+  const isConnectedRef = useRef<Record<string, boolean>>({});
 
   const { isConnected, connect, disconnect, send } = useWebSocket(
-    WS_ENDPOINTS.CLIENT_AUDIO,
+    WS_ENDPOINTS,
     {
-      onOpen: async () => {
-        console.log('Audio WebSocket connected');
+      onOpen: async (endpoint) => {
+        console.log(`Connected to ${endpoint}`);
         await startRecording();
       },
-      onClose: () => {
-        console.log('Audio WebSocket closed');
+      onClose: (endpoint) => {
+        console.log(`Disconnected from ${endpoint}`);
         stopRecording();
       },
-      onError: (error) => {
-        console.error('Audio WebSocket error:', error);
+      onError: (endpoint, error) => {
+        console.error(`Error on ${endpoint}:`, error);
         stopRecording();
-      }
+      },
     }
   );
+
+  useEffect(() => {
+    isConnectedRef.current = isConnected;
+  }, [isConnected]);
+
 
   const startRecording = async () => {
     try {
@@ -97,7 +103,7 @@ export default function Page() {
     const workletNode = new AudioWorkletNode(audioContext, "audio-chunker");
 
     workletNode.port.onmessage = (event) => {
-      send(event.data);
+      send(WS_ENDPOINT_ENUM.CLIENT_AUDIO, event.data);
     };
 
     source.connect(workletNode).connect(audioContext.destination);
@@ -121,10 +127,10 @@ export default function Page() {
     <div className="flex flex-col h-screen">
       <header className="bg-gray-100 p-4 flex justify-between items-center">
         <Button
-          onClick={isConnected ? disconnect : connect}
-          // onClick={isConnected ? disconnectWebSocket : startRecording}
+          onClick={isConnected.CLIENT_AUDIO ? disconnect : connect}
+          // onClick={isConnected.CLIENT_AUDIO ? disconnectWebSocket : startRecording}
         >
-          {isConnected ? "Disconnect" : "Connect"}
+          {isConnected.CLIENT_AUDIO ? "Disconnect" : "Connect"}
         </Button>
 
         <div className="flex justify-center items-center gap-2">

@@ -1,96 +1,111 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
-interface UseWebSocketOptions {
-  onMessage?: (event: MessageEvent) => void;
-  onOpen?: () => void;
-  onClose?: () => void;
-  onError?: (event: Event) => void;
-  reconnect?: boolean;
-  reconnectAttempts?: number;
-  reconnectInterval?: number;
+interface WebSocketOptions {
+  onMessage?: (event: MessageEvent, endpoint: string) => void;
+  onOpen?: (endpoint: string) => void;
+  onClose?: (endpoint: string) => void;
+  onError?: (endpoint: string, error: Event) => void;
 }
 
 export const useWebSocket = (
-  url: string,
-  options: UseWebSocketOptions = {}
+  endpoints: Record<string, string>,
+  options: WebSocketOptions = {}
 ) => {
   const {
     onMessage,
     onOpen,
     onClose,
     onError,
-    reconnect = false,
-    reconnectAttempts = 3,
-    reconnectInterval = 5000,
   } = options;
 
-  const [isConnected, setIsConnected] = useState(false);
-  const ws = useRef<WebSocket | null>(null);
-  const reconnectCount = useRef(0);
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  const reconnectTimeoutId = useRef<NodeJS.Timeout>();
+  const connections = useRef<Record<string, WebSocket | null>>({});
+  const connectionStates = useRef<Record<string, boolean>>({});
+  const [isConnected, setIsConnected] = useState<Record<string, boolean>>({});
+  // const [responses, setResponses] = useState<Record<string, any>>({});
+  const isConnectedRef = useRef(isConnected);
+
+  useEffect(() => {
+    isConnectedRef.current = isConnected;
+  }, [isConnected]);
 
   const connect = useCallback(() => {
-    if (ws.current?.readyState === WebSocket.OPEN) {
-      console.log('WebSocket is already connected');
-      return;
-    }
+    Object.entries(endpoints).forEach(([key, url]) => {
+      if (connections.current[key]?.readyState === WebSocket.OPEN) {
+        console.log(`WebSocket ${key} is already connected`);
+        return;
+      }
 
-    try {
-      const socket = new WebSocket(url);
-      ws.current = socket;
+      try {
+        const socket = new WebSocket(url);
+        connections.current[key] = socket;
 
-      socket.onopen = () => {
-        console.log('WebSocket connected');
-        setIsConnected(true);
-        reconnectCount.current = 0;
-        onOpen?.();
-      };
+        socket.onopen = () => {
+          console.log(`WebSocket connected: ${key}`);
+          connectionStates.current[key] = true;
+          setIsConnected((prev) => ({ ...prev, [key]: true }));
+          onOpen?.(key);
+        };
 
-      socket.onclose = () => {
-        console.log('WebSocket closed');
-        setIsConnected(false);
-        onClose?.();
+        socket.onclose = () => {
+          console.log(`WebSocket disconnected: ${key}`);
+          connectionStates.current[key] = false;
+          setIsConnected((prev) => ({ ...prev, [key]: false }));
+          onClose?.(key);
+        };
 
-        if (reconnect && reconnectCount.current < reconnectAttempts) {
-          reconnectCount.current += 1;
-          reconnectTimeoutId.current = setTimeout(connect, reconnectInterval);
-        }
-      };
+        socket.onerror = (error) => {
+          console.error(`WebSocket error (${key}):`, error);
+          onError?.(key, error);
+        };
 
-      socket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        onError?.(error);
-      };
+        socket.onmessage = (event) => {
+          console.log(`Message received on ${key}:`, event.data);
+          // setResponses((prev) => ({ ...prev, [key]: event.data }))
+          onMessage?.(event, key);
+        };
+      } catch (error) {
+        console.error(`Failed to connect WebSocket (${key}):`, error);
+      }
+    });
+  }, [endpoints, onMessage, onOpen, onClose, onError]);
 
-      socket.onmessage = (event) => {
-        onMessage?.(event);
-      };
-    } catch (error) {
-      console.error('Failed to create WebSocket connection:', error);
-    }
-  }, [url, onMessage, onOpen, onClose, onError, reconnect, reconnectAttempts, reconnectInterval]);
 
   const disconnect = useCallback(() => {
-    if (reconnectTimeoutId.current) {
-      clearTimeout(reconnectTimeoutId.current);
-    }
-
-    if (ws.current) {
-      ws.current.close();
-      ws.current = null;
-      setIsConnected(false);
-    }
+    Object.keys(connections.current).forEach((key) => {
+      const socket = connections.current[key];
+      if (socket) {
+        socket.close();
+        connections.current[key] = null;
+        connectionStates.current[key] = false;
+      }
+    });
+    setIsConnected({});
   }, []);
 
-  const send = useCallback((data: string | ArrayBuffer | Blob) => {
-    if (ws.current?.readyState === WebSocket.OPEN) {
-      ws.current.send(data);
-    } else {
-      console.error('WebSocket is not connected');
-    }
-  }, []);
+  const send = useCallback(
+    (endpoint: keyof typeof endpoints, data: string | ArrayBuffer | Blob) => {
+      if (!isConnectedRef.current[endpoint]) return;
+      const socket = connections.current[endpoint];
+      if (socket?.readyState === WebSocket.OPEN) {
+        socket.send(data);
+      } else {
+        console.error(`WebSocket (${endpoint}) is not connected`);
+      }
+    },
+    []
+  );
+
+  // const endpointResponse = useCallback(
+  //   (endpoint: keyof typeof endpoints) => {
+  //     // const response = responses[endpoint];
+  //     if (!response) {
+  //       // console.error(`No response stored for endpoint: ${endpoint}`);
+  //       return;
+  //     }
+  //     send(endpoint, response); // Send the response back to the server
+  //   },
+  //   [responses, send]
+  // );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -99,10 +114,13 @@ export const useWebSocket = (
     };
   }, [disconnect]);
 
+  console.log(isConnected);
+
   return {
     isConnected,
     connect,
     disconnect,
-    send
+    send,
+    // endpointResponse
   };
 };

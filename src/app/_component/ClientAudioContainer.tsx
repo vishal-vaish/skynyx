@@ -13,40 +13,40 @@ type Props = {
 const ClientAudioContainer = ({audioContext, stream}:Props) => {
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    if(audioContext) {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.lang = "en-US";
-
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
-          let transcript = "";
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const result = event.results[i];
-            transcript += result[0].transcript;
-          }
-          setMessage(transcript.trim());
-        };
-
-        recognition.onerror = (event) => {
-          console.error("Speech recognition error:", event.error);
-        };
-
-        recognition.start();
-
-        return () => {
-          recognition.stop();
-        };
-      } else {
-        console.warn("SpeechRecognition API is not supported in this browser.");
-      }
-    }
-  }, [audioContext]);
+  // useEffect(() => {
+  //   if(audioContext) {
+  //     const SpeechRecognition =
+  //       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+  //
+  //     if (SpeechRecognition) {
+  //       const recognition = new SpeechRecognition();
+  //       recognition.continuous = true;
+  //       recognition.interimResults = true;
+  //       recognition.lang = "en-US";
+  //
+  //       recognition.onresult = (event: SpeechRecognitionEvent) => {
+  //         let transcript = "";
+  //         for (let i = event.resultIndex; i < event.results.length; i++) {
+  //           const result = event.results[i];
+  //           transcript += result[0].transcript;
+  //         }
+  //         setMessage(transcript.trim());
+  //       };
+  //
+  //       recognition.onerror = (event) => {
+  //         console.error("Speech recognition error:", event.error);
+  //       };
+  //
+  //       recognition.start();
+  //
+  //       return () => {
+  //         recognition.stop();
+  //       };
+  //     } else {
+  //       console.warn("SpeechRecognition API is not supported in this browser.");
+  //     }
+  //   }
+  // }, [audioContext]);
 
   return (
     <div className="flex items-center justify-center w-full h-full p-4 border-b flex-col">
