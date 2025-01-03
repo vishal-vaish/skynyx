@@ -1,20 +1,16 @@
 "use client"
 
 import {Button} from "@/components/ui/button";
-import {useEffect, useRef, useState} from "react";
+import {useRef} from "react";
 import {cn} from "@/lib/utils";
 import ClientAudioContainer from "@/app/_component/ClientAudioContainer";
 import {useWebSocket} from "@/hooks/useWebSocket";
 import {WS_ENDPOINTS} from "@/types/websocketConstant";
 
 export default function Page() {
-  // const [isConnected, setIsConnected] = useState(false);
-  const websocketRef = useRef<WebSocket | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [isListening, setIsListening] = useState(false);
   const audioWorkletNodeRef = useRef<AudioWorkletNode | null>(null);
-  const [audioChunks, setAudioChunks] = useState<Int16Array[]>([]);
 
   const { isConnected, connect, disconnect, send } = useWebSocket(
     WS_ENDPOINTS.CLIENT_AUDIO,
@@ -34,46 +30,9 @@ export default function Page() {
     }
   );
 
-  // useEffect(() => {
-  //   if (isConnected && websocketRef.current) {
-  //     console.log("Recording Started");
-  //     startRecording();
-  //   }
-  //
-  //   return () => {
-  //     if (audioContextRef.current) {
-  //       audioContextRef.current.close();
-  //     }
-  //     if (streamRef.current) {
-  //       streamRef.current.getTracks().forEach(track => track.stop());
-  //     }
-  //   };
-  // }, [isConnected]);
-
-  // const connectWebSocket = () => {
-  //   const ws = new WebSocket("ws://192.168.10.10:8000/ws/audio");
-  //   websocketRef.current = ws;
-  //
-  //   ws.onopen = () => {
-  //     setIsConnected(true);
-  //     console.log("Connected to WebSocket server");
-  //   };
-  //
-  //   ws.onclose = () => {
-  //     setIsConnected(false);
-  //     console.log("Disconnected from WebSocket server");
-  //   };
-  //
-  //   ws.onerror = (error) => {
-  //     console.error("WebSocket error:", error);
-  //     setIsConnected(false);
-  //   };
-  // };
-
   const startRecording = async () => {
     try {
       await createAudioProcessor();
-      setIsListening(true);
     } catch (error) {
       console.error("Error starting recording:", error);
     }
@@ -138,13 +97,7 @@ export default function Page() {
     const workletNode = new AudioWorkletNode(audioContext, "audio-chunker");
 
     workletNode.port.onmessage = (event) => {
-      console.log(event.data);
       send(event.data);
-      // if (websocketRef.current?.readyState === WebSocket.OPEN) {
-      //   websocketRef.current.send(event.data);
-      // }
-      const audioChunk = new Int16Array(event.data);
-      setAudioChunks((prevChunks) => [...prevChunks, audioChunk]);
     };
 
     source.connect(workletNode).connect(audioContext.destination);
@@ -162,24 +115,12 @@ export default function Page() {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
-    setIsListening(false);
   };
-
-  // const disconnectWebSocket = () => {
-  //   if (websocketRef.current) {
-  //     websocketRef.current.close();
-  //     websocketRef.current = null;
-  //   }
-  //   setIsConnected(false);
-  //   stopRecording();
-  //   console.log("WebSocket connection closed");
-  // };
 
   return (
     <div className="flex flex-col h-screen">
       <header className="bg-gray-100 p-4 flex justify-between items-center">
         <Button
-          // onClick={isConnected ? disconnectWebSocket : connectWebSocket}
           onClick={isConnected ? disconnect : connect}
           // onClick={isConnected ? disconnectWebSocket : startRecording}
         >
