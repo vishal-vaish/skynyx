@@ -1,41 +1,39 @@
 "use client"
 
+import useWebSocket from "@/hooks/useWebSockets";
+import {WS_ENDPOINTS} from "@/lib/constant";
 import {Button} from "@/components/ui/button";
-import {useRef, useState} from "react";
 import {cn} from "@/lib/utils";
+import {useEffect, useRef, useState} from "react";
 import ClientAudioContainer from "@/app/_component/ClientAudioContainer";
-import {useWebSocket} from "@/hooks/useWebSocket";
-import {WS_ENDPOINT_ENUM, WS_ENDPOINTS} from "@/types/websocketConstant";
+import AgentResponse from "@/app/_component/AgentResponse";
 
 export default function Page() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioWorkletNodeRef = useRef<AudioWorkletNode | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [connected, setConnected] = useState<boolean>(false);
 
-  const { isConnected, connect, disconnect, send } = useWebSocket(
-    WS_ENDPOINTS,
-    {
-      onOpen: async (endpoint) => {
-        console.log(`Connected to ${endpoint}`);
-        if (endpoint === WS_ENDPOINT_ENUM.CLIENT_AUDIO) {
-          await startRecording();
-        }
-      },
-      onClose: (endpoint) => {
-        console.log(`Disconnected from ${endpoint}`);
-        if (endpoint === WS_ENDPOINT_ENUM.CLIENT_AUDIO) {
-          stopRecording();
-        }
-      },
-      onError: (endpoint, error) => {
-        console.error(`Error on ${endpoint}:`, error);
-        if (endpoint === WS_ENDPOINT_ENUM.CLIENT_AUDIO) {
-          stopRecording();
-        }
-      },
+  const { isConnected, connect, disconnect, send } = useWebSocket(WS_ENDPOINTS.CLIENT_AUDIO);
+
+  const handleConnect = () => {
+    connect();
+  }
+
+  const handleDisconnect = () => {
+    disconnect();
+  }
+
+  useEffect(() => {
+    if(isConnected) {
+      startRecording();
+      setConnected(true);
+    } else {
+      stopRecording();
+      setConnected(false);
     }
-  );
+  }, [isConnected]);
 
   const startRecording = async () => {
     try {
@@ -106,7 +104,7 @@ export default function Page() {
     const workletNode = new AudioWorkletNode(audioContext, "audio-chunker");
 
     workletNode.port.onmessage = (event) => {
-      send(WS_ENDPOINT_ENUM.CLIENT_AUDIO, event.data);
+      send(event.data);
     };
 
     source.connect(workletNode).connect(audioContext.destination);
@@ -131,20 +129,18 @@ export default function Page() {
     <div className="flex flex-col h-screen">
       <header className="bg-gray-100 p-4 flex justify-between items-center">
         <Button
-          // onClick={isConnected ? disconnectWebSocket : connectWebSocket}
-          onClick={isConnected.CLIENT_AUDIO ? disconnect : connect}
-          // onClick={isConnected ? disconnectWebSocket : startRecording}
+          onClick={isConnected ? handleDisconnect : handleConnect}
         >
-          {isConnected.CLIENT_AUDIO ? "Disconnect" : "Connect"}
+          {isConnected ? "Disconnect" : "Connect"}
         </Button>
 
         <div className="flex justify-center items-center gap-2">
           <div className={cn("w-4 h-4 rounded-full",
-            isConnected.CLIENT_AUDIO ? "bg-green-500" : "bg-red-500",
+            isConnected ? "bg-green-500" : "bg-red-500",
           )}
           />
           <div className="text-muted-foreground">
-            {isConnected.CLIENT_AUDIO ? "Connected" : "Disconnected"}
+            {isConnected ? "Connected" : "Disconnected"}
           </div>
         </div>
       </header>
@@ -153,10 +149,9 @@ export default function Page() {
           <ClientAudioContainer
             audioContext={audioContextRef.current}
             stream={stream}
+            connected={connected}
           />
-          <div className="flex items-center justify-center w-full h-full p-4 border-b flex-col">
-            Agent Side
-          </div>
+          <AgentResponse connected={connected}/>
         </div>
         <div className="w-1/2 p-4 overflow-y-auto">
           <div>Chatting</div>

@@ -1,21 +1,15 @@
-"use client";
-
-import {useEffect, useState} from "react";
-import {Textarea} from "@/components/ui/textarea";
+import React, {useEffect, useState} from 'react'
 import useWebSocket from "@/hooks/useWebSockets";
 import {WS_ENDPOINTS} from "@/lib/constant";
-import WaveformSvg from "@/app/_component/WaveformSvg";
+import {Textarea} from "@/components/ui/textarea";
 
 type Props = {
-  audioContext: AudioContext | null;
-  stream: MediaStream | null;
   connected: boolean;
 }
 
-const ClientAudioContainer = ({audioContext, stream, connected}: Props) => {
+const AgentResponse = ({connected}:Props) => {
   const [message, setMessage] = useState<string>("");
-
-  const {connect,disconnect, response} = useWebSocket(WS_ENDPOINTS.CLIENT_TEXT);
+  const {connect, disconnect, response} = useWebSocket(WS_ENDPOINTS.AGENT_TEXT);
 
   useEffect(() => {
     if (connected) {
@@ -33,16 +27,16 @@ const ClientAudioContainer = ({audioContext, stream, connected}: Props) => {
   return (
     <div className="flex items-center justify-center w-full h-full p-4 border-b flex-col">
       <div className="">
-        <WaveformSvg audioContext={audioContext} stream={stream}/>
+        {/*<WaveformSvg audioContext={audioContext} stream={stream}/>*/}
       </div>
       <div className="w-full h-full">
         <Textarea
           value={message}
-          className="h-full resize-none text-lg"
+          className="h-full resize-none"
           readOnly
         />
       </div>
     </div>
   )
 }
-export default ClientAudioContainer
+export default AgentResponse
