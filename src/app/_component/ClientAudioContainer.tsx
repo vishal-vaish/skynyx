@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Textarea} from "@/components/ui/textarea";
 import useWebSocket from "@/hooks/useWebSockets";
 import {WS_ENDPOINTS} from "@/lib/constant";
@@ -29,10 +29,10 @@ const ClientAudioContainer = ({audioContext, stream, connected}: Props) => {
     setMessage(response);
   }, [response]);
 
-
   return (
     <div className="flex items-center justify-center w-full h-full p-4 border-b flex-col">
-      <div className="">
+      <div className="text-base font-bold">Live Audio Transcription</div>
+      <div>
         <WaveformSvg audioContext={audioContext} stream={stream}/>
       </div>
       <div className="w-full h-full">

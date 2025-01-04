@@ -26,6 +26,7 @@ const AgentResponse = ({connected}:Props) => {
 
   return (
     <div className="flex items-center justify-center w-full h-full p-4 border-b flex-col">
+      <div className="text-base font-bold">AI Response</div>
       <div className="">
         {/*<WaveformSvg audioContext={audioContext} stream={stream}/>*/}
       </div>
