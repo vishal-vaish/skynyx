@@ -1,7 +1,7 @@
 "use client"
 
 import {Button} from "@/components/ui/button";
-import {useEffect, useRef} from "react";
+import {useRef, useState} from "react";
 import {cn} from "@/lib/utils";
 import ClientAudioContainer from "@/app/_component/ClientAudioContainer";
 import {useWebSocket} from "@/hooks/useWebSocket";
@@ -11,30 +11,31 @@ export default function Page() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioWorkletNodeRef = useRef<AudioWorkletNode | null>(null);
-  const isConnectedRef = useRef<Record<string, boolean>>({});
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
   const { isConnected, connect, disconnect, send } = useWebSocket(
     WS_ENDPOINTS,
     {
       onOpen: async (endpoint) => {
         console.log(`Connected to ${endpoint}`);
-        await startRecording();
+        if (endpoint === WS_ENDPOINT_ENUM.CLIENT_AUDIO) {
+          await startRecording();
+        }
       },
       onClose: (endpoint) => {
         console.log(`Disconnected from ${endpoint}`);
-        stopRecording();
+        if (endpoint === WS_ENDPOINT_ENUM.CLIENT_AUDIO) {
+          stopRecording();
+        }
       },
       onError: (endpoint, error) => {
         console.error(`Error on ${endpoint}:`, error);
-        stopRecording();
+        if (endpoint === WS_ENDPOINT_ENUM.CLIENT_AUDIO) {
+          stopRecording();
+        }
       },
     }
   );
-
-  useEffect(() => {
-    isConnectedRef.current = isConnected;
-  }, [isConnected]);
-
 
   const startRecording = async () => {
     try {
@@ -59,7 +60,9 @@ export default function Page() {
         noiseSuppression: true,
       }
     });
+
     streamRef.current = stream;
+    setStream(stream);
 
     const workletCode = `
       class AudioChunker extends AudioWorkletProcessor {
@@ -120,6 +123,7 @@ export default function Page() {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
+      setStream(null);
     }
   };
 
@@ -127,19 +131,20 @@ export default function Page() {
     <div className="flex flex-col h-screen">
       <header className="bg-gray-100 p-4 flex justify-between items-center">
         <Button
+          // onClick={isConnected ? disconnectWebSocket : connectWebSocket}
           onClick={isConnected.CLIENT_AUDIO ? disconnect : connect}
-          // onClick={isConnected.CLIENT_AUDIO ? disconnectWebSocket : startRecording}
+          // onClick={isConnected ? disconnectWebSocket : startRecording}
         >
           {isConnected.CLIENT_AUDIO ? "Disconnect" : "Connect"}
         </Button>
 
         <div className="flex justify-center items-center gap-2">
           <div className={cn("w-4 h-4 rounded-full",
-            isConnected ? "bg-green-500" : "bg-red-500",
+            isConnected.CLIENT_AUDIO ? "bg-green-500" : "bg-red-500",
           )}
           />
           <div className="text-muted-foreground">
-            {isConnected ? "Connected" : "Disconnected"}
+            {isConnected.CLIENT_AUDIO ? "Connected" : "Disconnected"}
           </div>
         </div>
       </header>
@@ -147,13 +152,11 @@ export default function Page() {
         <div className="w-1/2 flex flex-col border-r">
           <ClientAudioContainer
             audioContext={audioContextRef.current}
-            stream={streamRef.current}
+            stream={stream}
           />
-          {/*<ClientAudioContainer*/}
-          {/*  audioContext={audioContextRef.current}*/}
-          {/*  stream={streamRef.current}*/}
-          {/*  volumeRef={volumeRef}*/}
-          {/*/>*/}
+          <div className="flex items-center justify-center w-full h-full p-4 border-b flex-col">
+            Agent Side
+          </div>
         </div>
         <div className="w-1/2 p-4 overflow-y-auto">
           <div>Chatting</div>
