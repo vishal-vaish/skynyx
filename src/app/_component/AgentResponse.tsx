@@ -54,6 +54,10 @@ const AgentResponse = ({connected}: Props) => {
         source.start(0);
 
         setStream(mediaStreamDestination.stream);
+
+        source.onended = () => {
+          setStream(null);
+        };
       } catch (error) {
         console.error('Error processing audio message:', error);
       }
@@ -64,10 +68,9 @@ const AgentResponse = ({connected}: Props) => {
     }
   }, [audioResponse]);
 
-
   return (
     <div className="flex items-center justify-center w-full h-full p-4 border-b flex-col">
-      <div className="text-base font-bold">AI Response</div>
+      <div className="text-base font-bold">Agent Response</div>
       <div>
         <WaveformSvg audioContext={audioContextRef.current} stream={stream}/>
       </div>

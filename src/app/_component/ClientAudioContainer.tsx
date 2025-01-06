@@ -32,7 +32,7 @@ const ClientAudioContainer = ({audioContext, stream, connected}: Props) => {
 
   return (
     <div className="flex items-center justify-center w-full h-full p-4 border-b flex-col">
-      <div className="text-base font-bold">Live Audio Transcription</div>
+      <div className="text-base font-bold">Client Request</div>
       <div>
         <WaveformSvg audioContext={audioContext} stream={stream}/>
       </div>
