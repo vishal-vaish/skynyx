@@ -5,6 +5,7 @@ import {Textarea} from "@/components/ui/textarea";
 import useWebSocket from "@/hooks/useWebSockets";
 import {WS_ENDPOINTS} from "@/lib/constant";
 import WaveformSvg from "@/app/_component/WaveformSvg";
+import {useChat} from "@/context/ChatContext";
 
 type Props = {
   audioContext: AudioContext | null;
@@ -14,7 +15,7 @@ type Props = {
 
 const ClientAudioContainer = ({audioContext, stream, connected}: Props) => {
   const [message, setMessage] = useState<string>("");
-
+  const {addMessage} = useChat();
   const {connect,disconnect, response} = useWebSocket(WS_ENDPOINTS.CLIENT_TEXT);
 
   useEffect(() => {
@@ -26,13 +27,15 @@ const ClientAudioContainer = ({audioContext, stream, connected}: Props) => {
   }, [connected]);
 
   useEffect(() => {
-    if (typeof response === "string")
+    if (typeof response === "string") {
       setMessage(response);
+      addMessage(response, "user");
+    }
   }, [response]);
 
   return (
     <div className="flex items-center justify-center w-full h-full p-4 border-b flex-col">
-      <div className="text-base font-bold">Client Request</div>
+      <div className="text-base font-bold">Client</div>
       <div>
         <WaveformSvg audioContext={audioContext} stream={stream}/>
       </div>

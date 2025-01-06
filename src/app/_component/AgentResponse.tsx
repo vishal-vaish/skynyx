@@ -3,6 +3,7 @@ import useWebSocket from "@/hooks/useWebSockets";
 import {WS_ENDPOINTS} from "@/lib/constant";
 import {Textarea} from "@/components/ui/textarea";
 import WaveformSvg from "@/app/_component/WaveformSvg";
+import {useChat} from "@/context/ChatContext";
 
 type Props = {
   connected: boolean;
@@ -18,6 +19,7 @@ const AgentResponse = ({connected}: Props) => {
     disconnect: audioDisconnect,
     response: audioResponse
   } = useWebSocket(WS_ENDPOINTS.AGENT_AUDIO);
+  const {addMessage} = useChat();
 
   useEffect(() => {
     if (connected) {
@@ -30,8 +32,10 @@ const AgentResponse = ({connected}: Props) => {
   }, [connected]);
 
   useEffect(() => {
-    if (typeof response === "string")
+    if (typeof response === "string") {
       setMessage(response);
+      addMessage(response, "assistant");
+    }
   }, [response]);
 
   useEffect(() => {
@@ -70,7 +74,7 @@ const AgentResponse = ({connected}: Props) => {
 
   return (
     <div className="flex items-center justify-center w-full h-full p-4 border-b flex-col">
-      <div className="text-base font-bold">Agent Response</div>
+      <div className="text-base font-bold">AI Agent</div>
       <div>
         <WaveformSvg audioContext={audioContextRef.current} stream={stream}/>
       </div>

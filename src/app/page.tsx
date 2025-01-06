@@ -7,6 +7,7 @@ import {cn} from "@/lib/utils";
 import {useEffect, useRef, useState} from "react";
 import ClientAudioContainer from "@/app/_component/ClientAudioContainer";
 import AgentResponse from "@/app/_component/AgentResponse";
+import Chat from "@/app/_component/Chat";
 
 export default function Page() {
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -154,7 +155,7 @@ export default function Page() {
           <AgentResponse connected={connected}/>
         </div>
         <div className="w-1/2 p-4 overflow-y-auto">
-          <div>Chatting</div>
+          <Chat/>
         </div>
       </div>
     </div>
