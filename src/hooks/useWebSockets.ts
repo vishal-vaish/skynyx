@@ -1,21 +1,22 @@
-import { useState, useCallback } from 'react';
+import {useState, useCallback} from 'react';
 
 interface UseWebSocketReturn {
   isConnected: boolean;
   connect: () => void;
   disconnect: () => void;
   send: (message: string) => void;
-  response: string;
+  response: string | ArrayBuffer | null;
 }
 
 const useWebSocket = (endpoint: string): UseWebSocketReturn => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [response, setResponse] = useState<string>("");
+  const [response, setResponse] = useState<string | ArrayBuffer | null>(null);
 
   const connect = useCallback(() => {
     if (!isConnected && endpoint) {
       const socketInstance = new WebSocket(endpoint);
+      socketInstance.binaryType = "arraybuffer";
 
       socketInstance.onopen = () => {
         setIsConnected(true);
@@ -24,7 +25,7 @@ const useWebSocket = (endpoint: string): UseWebSocketReturn => {
 
       socketInstance.onclose = () => {
         setIsConnected(false);
-        setResponse("");
+        setResponse(null);
         console.log(`Disconnected from ${endpoint}`);
       };
 
@@ -34,9 +35,13 @@ const useWebSocket = (endpoint: string): UseWebSocketReturn => {
 
       socketInstance.onmessage = (event) => {
         try {
-          const message = JSON.parse(event.data);
-          if (message.text) {
-            setResponse(message.text);
+          if (event.data instanceof ArrayBuffer) {
+            setResponse(event.data);
+          } else if (typeof event.data === 'string') {
+            const message = JSON.parse(event.data);
+            if (message.text) {
+              setResponse(message.text);
+            }
           }
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);

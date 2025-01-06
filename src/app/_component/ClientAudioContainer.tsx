@@ -26,7 +26,8 @@ const ClientAudioContainer = ({audioContext, stream, connected}: Props) => {
   }, [connected]);
 
   useEffect(() => {
-    setMessage(response);
+    if (typeof response === "string")
+      setMessage(response);
   }, [response]);
 
   return (
