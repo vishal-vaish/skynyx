@@ -24,7 +24,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: new Date().toISOString(),
       text,
       type,
-      timestamp: new Date().toLocaleTimeString(),
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
     setMessages((prevMessages) => [...prevMessages, newMessage]);

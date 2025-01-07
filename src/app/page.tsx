@@ -9,6 +9,7 @@ import ClientAudioContainer from "@/app/_component/ClientAudioContainer";
 import AgentResponse from "@/app/_component/AgentResponse";
 import Chat from "@/app/_component/Chat";
 import {Power} from "lucide-react";
+import {ModeToggle} from "@/components/ModeToggle";
 
 export default function Page() {
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -129,7 +130,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-col h-screen">
-      <header className="bg-gray-100 p-2 flex justify-between items-center">
+      <header className="bg-background p-2 flex justify-between items-center border-b">
         <div className={"relative p-4"}>
           <h1
             className="font-bold text-2xl tracking-tight animate-gradient bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500 bg-clip-text text-transparent bg-300% dark:from-purple-300 dark:via-pink-400 dark:to-blue-400">
@@ -156,6 +157,7 @@ export default function Page() {
             <Power className="mr-2 h-4 w-4"/>
             {isConnected ? "Disconnect" : "Connect"}
           </Button>
+          <ModeToggle/>
         </div>
       </header>
       <div className="flex flex-1 overflow-hidden">
