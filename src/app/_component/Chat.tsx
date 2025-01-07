@@ -64,7 +64,6 @@ export function ChatMessage({ message }: ChatMessageProps) {
       {message.type === "assistant" && (
         <Avatar className="w-8 h-8">
           <AvatarFallback><Bot className="w-4 h-4"/></AvatarFallback>
-          <AvatarImage src="/ai-avatar.png"/>
         </Avatar>
       )}
       <div
@@ -82,7 +81,6 @@ export function ChatMessage({ message }: ChatMessageProps) {
       {message.type === "user" && (
         <Avatar className="w-8 h-8">
           <AvatarFallback><User className="w-4 h-4"/></AvatarFallback>
-          <AvatarImage src="/user-avatar.png"/>
         </Avatar>
       )}
     </div>

@@ -19,8 +19,6 @@ const ChatContext = createContext<ChatContextProps | undefined>(undefined);
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [messages, setMessages] = useState<Message[]>([]);
 
-  console.log(messages);
-
   const addMessage = (text: string, type: "user" | "assistant") => {
     const newMessage: Message = {
       id: new Date().toISOString(),

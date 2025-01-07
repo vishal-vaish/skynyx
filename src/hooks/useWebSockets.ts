@@ -62,8 +62,6 @@ const useWebSocket = (endpoint: string): UseWebSocketReturn => {
   const send = useCallback((message: string | ArrayBuffer | Blob) => {
     if (socket && isConnected) {
       socket.send(message);
-    } else {
-      console.log('WebSocket is not connected.');
     }
   }, [socket, isConnected]);
 
