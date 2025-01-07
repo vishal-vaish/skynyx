@@ -6,7 +6,7 @@ import {linearPath} from "waveform-path";
 const WaveformSvg = ({audioContext, stream}) => {
   const svgRef = useRef(null);
   const [initialized, setInitialized] = useState(false);
-
+  const [svgWidth, setSvgWidth] = useState(600);
   const colors = [
     "rgb(0,255,10)",
     "rgb(0,188,212)",
@@ -14,7 +14,6 @@ const WaveformSvg = ({audioContext, stream}) => {
     "rgb(103,58,183)",
     "rgb(233,30,99)",
   ];
-
   const dotsPerColor = 16;
 
   useEffect(() => {
@@ -33,7 +32,7 @@ const WaveformSvg = ({audioContext, stream}) => {
       const options = {
         samples: 80,
         type: "bars",
-        top: 20,
+        top: 10,
         normalize: false,
         paths: [
           {d: "V", sy: 0, x: 50, ey: 100},
@@ -55,17 +54,44 @@ const WaveformSvg = ({audioContext, stream}) => {
     };
   }, [audioContext, stream]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width > 1200 && width < 1500) {
+        setSvgWidth(500);
+      } else if (width > 800 && width <= 1200) {
+        setSvgWidth(400);
+      } else if (width <= 800) {
+        setSvgWidth(200);
+      } else {
+        setSvgWidth(600);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
-     <svg id="Mic1" height="140px" width="600px" ref={svgRef}>
+     <svg
+        id="Mic1"
+        height="120px"
+        width={svgWidth}
+        ref={svgRef}
+     >
        {initialized ? (
           <>
             <defs>
               <linearGradient id="lgrad" x1="0%" y1="50%" x2="100%" y2="50%">
-                <stop offset="0%" style={{ stopColor: "rgb(0,255,10)", stopOpacity: 1 }} />
-                <stop offset="25%" style={{ stopColor: "rgb(0,188,212)", stopOpacity: 0.7 }} />
-                <stop offset="50%" style={{ stopColor: "rgb(238,130,238)", stopOpacity: 1 }} />
-                <stop offset="75%" style={{ stopColor: "rgb(103,58,183)", stopOpacity: 0.7 }} />
-                <stop offset="100%" style={{ stopColor: "rgb(233,30,99)", stopOpacity: 1 }} />
+                <stop offset="0%" style={{stopColor: "rgb(0,255,10)", stopOpacity: 1}}/>
+                <stop offset="25%" style={{stopColor: "rgb(0,188,212)", stopOpacity: 0.7}}/>
+                <stop offset="50%" style={{stopColor: "rgb(238,130,238)", stopOpacity: 1}}/>
+                <stop offset="75%" style={{stopColor: "rgb(103,58,183)", stopOpacity: 0.7}}/>
+                <stop offset="100%" style={{stopColor: "rgb(233,30,99)", stopOpacity: 1}}/>
               </linearGradient>
             </defs>
             <path
@@ -79,13 +105,13 @@ const WaveformSvg = ({audioContext, stream}) => {
           </>
        ) : (
           <>
-            {Array.from({ length: 80 }, (_, index) => {
+            {Array.from({length: 80}, (_, index) => {
               const colorIndex = Math.floor(index / dotsPerColor);
               const color = colors[colorIndex];
 
               const cx = (index + 1) * 8;
 
-              return <circle key={index} cx={cx} cy="90%" r="2" fill={color} />;
+              return <circle key={index} cx={cx} cy="90%" r="2" fill={color}/>;
             })}
           </>
        )}
