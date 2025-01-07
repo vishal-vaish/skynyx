@@ -8,6 +8,7 @@ import {useEffect, useRef, useState} from "react";
 import ClientAudioContainer from "@/app/_component/ClientAudioContainer";
 import AgentResponse from "@/app/_component/AgentResponse";
 import Chat from "@/app/_component/Chat";
+import {Power} from "lucide-react";
 
 export default function Page() {
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -16,7 +17,7 @@ export default function Page() {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [connected, setConnected] = useState<boolean>(false);
 
-  const { isConnected, connect, disconnect, send } = useWebSocket(WS_ENDPOINTS.CLIENT_AUDIO);
+  const {isConnected, connect, disconnect, send} = useWebSocket(WS_ENDPOINTS.CLIENT_AUDIO);
 
   const handleConnect = () => {
     connect();
@@ -27,7 +28,7 @@ export default function Page() {
   }
 
   useEffect(() => {
-    if(isConnected) {
+    if (isConnected) {
       startRecording();
       setConnected(true);
     } else {
@@ -128,21 +129,33 @@ export default function Page() {
 
   return (
     <div className="flex flex-col h-screen">
-      <header className="bg-gray-100 p-4 flex justify-between items-center">
-        <Button
-          onClick={isConnected ? handleDisconnect : handleConnect}
-        >
-          {isConnected ? "Disconnect" : "Connect"}
-        </Button>
-
-        <div className="flex justify-center items-center gap-2">
-          <div className={cn("w-4 h-4 rounded-full",
-            isConnected ? "bg-green-500" : "bg-red-500",
-          )}
-          />
-          <div className="text-muted-foreground">
-            {isConnected ? "Connected" : "Disconnected"}
+      <header className="bg-gray-100 p-2 flex justify-between items-center">
+        <div className={"relative p-4"}>
+          <h1
+            className="font-bold text-2xl tracking-tight animate-gradient bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500 bg-clip-text text-transparent bg-300% dark:from-purple-300 dark:via-pink-400 dark:to-blue-400">
+            SKYNYX-UI
+          </h1>
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-purple-400/20 via-pink-500/20 to-blue-500/20 blur-3xl -z-10 animate-pulse dark:from-purple-300/10 dark:via-pink-400/10 dark:to-blue-400/10"/>
+        </div>
+        <div className="flex gap-5 pr-2">
+          <div className="flex justify-center items-center gap-2">
+            <div className={cn("w-4 h-4 rounded-full",
+              isConnected ? "bg-green-500" : "bg-red-500",
+            )}
+            />
+            <div className="text-muted-foreground">
+              {isConnected ? "Connected" : "Disconnected"}
+            </div>
           </div>
+          <Button
+            variant={isConnected ? "destructive" : "outline"}
+            onClick={isConnected ? handleDisconnect : handleConnect}
+            className="gap-1"
+          >
+            <Power className="mr-2 h-4 w-4"/>
+            {isConnected ? "Disconnect" : "Connect"}
+          </Button>
         </div>
       </header>
       <div className="flex flex-1 overflow-hidden">

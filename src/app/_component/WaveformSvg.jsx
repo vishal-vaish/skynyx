@@ -62,7 +62,7 @@ const WaveformSvg = ({audioContext, stream}) => {
       } else if (width > 800 && width <= 1200) {
         setSvgWidth(400);
       } else if (width <= 800) {
-        setSvgWidth(200);
+        setSvgWidth(300);
       } else {
         setSvgWidth(600);
       }
