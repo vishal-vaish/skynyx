@@ -1,5 +1,5 @@
 // const BASE_URL = 'ws://192.168.10.10:8000/ws';
-const BASE_URL = 'ws://122.176.98.73:26978/ws';
+const BASE_URL = 'ws://47.247.68.61:8000/ws';
 
 export const WS_ENDPOINTS = {
   CLIENT_AUDIO: `${BASE_URL}/audio`,
