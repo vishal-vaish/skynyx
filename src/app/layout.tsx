@@ -3,6 +3,7 @@ import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
 import {ChatProvider} from "@/context/ChatContext";
 import {ThemeProvider} from "@/components/theme-provider";
+import AppWrapper from "@/components/AppWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,16 +31,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
     <main>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem
-        disableTransitionOnChange
-      >
-      <ChatProvider>
+      <AppWrapper>
         {children}
-      </ChatProvider>
-      </ThemeProvider>
+      </AppWrapper>
     </main>
     </body>
     </html>
