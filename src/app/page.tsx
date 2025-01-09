@@ -96,7 +96,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-col h-screen">
-      <header className="bg-background p-2 flex justify-between items-center border-b">
+      <header className="bg-background p-2 flex justify-between items-center border-b dark:border-white/20">
         <div className={"relative p-4"}>
           <h1
             className="font-bold text-2xl tracking-tight animate-gradient bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500 bg-clip-text text-transparent bg-300% dark:from-purple-300 dark:via-pink-400 dark:to-blue-400">
@@ -127,7 +127,7 @@ export default function Page() {
         </div>
       </header>
       <div className="flex flex-1 overflow-hidden">
-        <div className="w-1/2 flex flex-col border-r">
+        <div className="w-1/2 flex flex-col border-r dark:border-white/20">
           <ClientAudioContainer
             audioContext={audioContextRef.current}
             stream={stream}
