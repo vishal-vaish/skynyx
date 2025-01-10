@@ -7,11 +7,13 @@ import {useChat} from "@/context/ChatContext";
 
 type Props = {
   connected: boolean;
+  isUserSpeaking?: boolean;
 }
 
-const AgentResponse = ({connected}: Props) => {
+const AgentResponse = ({connected, isUserSpeaking}: Props) => {
   const [message, setMessage] = useState<string>("");
   const audioContextRef = useRef<AudioContext | null>(null);
+  const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const {connect, disconnect, response} = useWebSocket(WS_ENDPOINTS.AGENT_TEXT);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const {
@@ -31,6 +33,20 @@ const AgentResponse = ({connected}: Props) => {
     }
   }, [connected]);
 
+  const stopAudio = () => {
+    if (audioSourceRef.current) {
+      audioSourceRef.current.stop();
+      audioSourceRef.current = null;
+    }
+    setStream(null);
+  };
+
+  useEffect(() => {
+    if (isUserSpeaking) {
+      stopAudio();
+    }
+  }, [isUserSpeaking]);
+
   useEffect(() => {
     if (typeof response === "string") {
       setMessage(response);
@@ -49,9 +65,12 @@ const AgentResponse = ({connected}: Props) => {
           throw new Error('AudioContext not initialized');
         }
 
+        stopAudio();
+
         const audioBuffer = await audioContext.decodeAudioData(data);
         const mediaStreamDestination = audioContext.createMediaStreamDestination();
         const source = audioContext.createBufferSource();
+        audioSourceRef.current = source;
         source.buffer = audioBuffer;
         source.connect(mediaStreamDestination);
         source.connect(audioContext.destination);
@@ -60,6 +79,7 @@ const AgentResponse = ({connected}: Props) => {
         setStream(mediaStreamDestination.stream);
 
         source.onended = () => {
+          audioSourceRef.current = null;
           setStream(null);
         };
       } catch (error) {

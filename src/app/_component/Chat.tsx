@@ -18,7 +18,7 @@ const Chat = () => {
 
   if(messages.length === 0) {
     return (
-      <Card className="p-4 h-full overflow-hidden bg-background dark:border-white/20">
+      <Card className="p-4 h-full overflow-hidden bg-background">
         <div className="mb-4 text-center font-bold text-xl">Chat History</div>
         <div
           className="flex h-full w-full justify-center items-center"
