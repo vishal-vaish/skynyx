@@ -5,6 +5,7 @@ import {Card} from "@/components/ui/card";
 import {useChat} from "@/context/ChatContext";
 import { User, Bot } from 'lucide-react';
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
+import ChatSvgIcon from "@/components/ChatSvgIcon";
 
 const Chat = () => {
   const {messages} = useChat();
@@ -21,8 +22,9 @@ const Chat = () => {
       <Card className="p-4 h-full overflow-hidden bg-background">
         <div className="mb-4 text-center font-bold text-xl">Chat History</div>
         <div
-          className="flex h-full w-full justify-center items-center"
+          className="flex h-full w-full justify-center items-center flex-col gap-10"
         >
+          <ChatSvgIcon/>
           No Chat History
         </div>
       </Card>
