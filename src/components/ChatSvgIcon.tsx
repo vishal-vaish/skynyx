@@ -2,7 +2,7 @@ import React from 'react'
 
 const ChatSvgIcon = () => {
   return (
-    <svg fill="#5a5860" height="150px" width="150px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
+    <svg fill="currentColor" height="150px" width="150px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
          viewBox="0 0 60 60">
       <g>
         <path d="M26,9.586C11.664,9.586,0,20.09,0,33c0,4.499,1.418,8.856,4.106,12.627c-0.51,5.578-1.86,9.712-3.813,11.666

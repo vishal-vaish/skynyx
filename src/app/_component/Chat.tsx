@@ -24,7 +24,9 @@ const Chat = () => {
         <div
           className="flex h-full w-full justify-center items-center flex-col gap-10"
         >
-          <ChatSvgIcon/>
+          <div className="text-gray-300 dark:text-gray-400">
+            <ChatSvgIcon/>
+          </div>
           No Chat History
         </div>
       </Card>
