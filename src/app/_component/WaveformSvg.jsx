@@ -3,7 +3,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {linearPath} from "waveform-path";
 
-const WaveformSvg = ({audioContext, stream}) => {
+const WaveformSvg = ({audioContext, stream, silenceDetected}) => {
   const svgRef = useRef(null);
   const [initialized, setInitialized] = useState(false);
   const [svgWidth, setSvgWidth] = useState(600);
@@ -17,11 +17,18 @@ const WaveformSvg = ({audioContext, stream}) => {
   const dotsPerColor = 16;
 
   useEffect(() => {
+   if(silenceDetected) {
+     setInitialized(false)
+   } else {
+     setInitialized(true);
+   }
+  }, [silenceDetected]);
+
+  useEffect(() => {
     if (!audioContext || !stream) {
       setInitialized(false);
       return;
     }
-
     const source = audioContext.createMediaStreamSource(stream);
     const processor = audioContext.createScriptProcessor(2048, 1, 1);
 
